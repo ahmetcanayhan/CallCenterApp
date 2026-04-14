@@ -1,0 +1,32 @@
+﻿@page
+@model LoginModel
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow">
+        <div class="card-body p-5">
+          <h3 class="card-title text-center mb-4">Giriş Yap</h3>
+          <form method="post">
+              @Html.AntiForgeryToken()
+              <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+            <div class="mb-3">
+              <label asp-for="Input.Email" class="form-label"></label>
+              <input asp-for="Input.Email" class="form-control" placeholder="E-posta Adresi" required>
+              <span asp-validation-for="Input.Email" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+              <label asp-for="Input.Password" class="form-label"></label>
+              <input asp-for="Input.Password" class="form-control" placeholder="Şifre" required>
+            </div>
+            <div class="mb-3 form-check">
+              <input asp-for="Input.RememberMe" class="form-check-input">
+              <label asp-for="Input.RememberMe" class="form-check-label"></label>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Giriş Yap</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
