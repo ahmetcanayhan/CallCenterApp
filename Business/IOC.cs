@@ -26,12 +26,14 @@ namespace Business
 
             services.AddAutoMapper(config =>
             {
-
+                config.AddProfile<Profiles>();
             });
 
             services.AddScoped<IAuthService, AuthService>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            services.AddScoped<ILeadService, LeadService>();
 
             // Email Settings Konfigürasyonu
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));

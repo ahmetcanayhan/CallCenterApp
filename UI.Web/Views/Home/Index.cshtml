@@ -1,8 +1,191 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<Core.Concretes.DTOs.LeadListItemDto>
+
+@{
+    ViewData["Title"] = "Index";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<h1>Index</h1>
+@if (User.IsInRole("Manager"))
+{
+    <form method="post" enctype="multipart/form-data" asp-action="uploadLeads" asp-controller="home">
+        @Html.AntiForgeryToken()
+        <div class="input-group">
+            <input type="file" class="form-control" name="file">
+            <button class="btn btn-outline-secondary" type="submit">Upload</button>
+        </div>
+    </form>
+}
+
+<div class="row g-5">
+    <div class="col-md-4" btn-group>
+        <form method="post" asp-action="exportToExcel">
+            @Html.AntiForgeryToken()
+            <button class="btn btn-outline-success" type="submit">
+                Export To Excel
+            </button>
+        </form>
+    </div>
+    <div class="col-md-4" btn-group>
+        <form method="post" asp-action="exportToCSV">
+            @Html.AntiForgeryToken()
+            <button class="btn btn-outline-success" type="submit">
+                Export To CSV
+            </button>
+        </form>
+    </div>
+    <div class="col-md-4" btn-group>
+        <form method="post" asp-action="exportToJson">
+            @Html.AntiForgeryToken()
+            <button class="btn btn-outline-success" type="submit">
+                Export To JSON
+            </button>
+        </form>
+    </div>
 </div>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Email)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PhoneNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Notes)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ConvertedCustomerId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ConvertedAt)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AssignedUserId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AssignedUserName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Source)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Status)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PhoneNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Notes)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ConvertedCustomerId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ConvertedAt)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AssignedUserId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AssignedUserName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Source)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+                <td>
+                    @if (User.IsInRole("SalesPerson") && item.AssignedUserId == null)
+                    {
+                        <button class="btn btn-light btn-sm" onclick="pickLead('@item.Id')">👌Pick</button>
+                    }
+                    else
+                    {
+                        <div class="input-group">
+                            <select class="form-select" id="type_@item.Id">
+                                <option value="1">Choose Activity</option>
+                                <option value="2">Make Call</option>
+                                <option value="3">Send Email</option>
+                                <option value="4">Plan a Meeting</option>
+                                <option value="5">Create a Task</option>
+                                <option value="6">Take a Note</option>
+                                <option value="7">Plan a Demo</option>
+                                <option value="8">Follow Up</option>
+                            </select>
+                            <button class="btn btn-outline-secondary" type="button" onclick="addActivity('@item.Id')">Add</button>
+                        </div>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+            const pickLead = (id) => {
+        fetch(`/api/leads/pick/${id}`, {method:"POST", headers:{"content-type" : "application/json"}})
+                .then(response =>response.json())
+                .then(data=>{
+                    if (!data.isSuccess) {
+                        alert(data.messages.join(", "))
+                    }
+                    else {
+                        location.reload()
+                    }
+                })
+                .catch(err => console.error(err))
+            }
+
+            const addActivity = (id) => {
+                let type = document.getElementById(`type_${id}`).value
+                if (type != "")
+                {
+                if (confirm(`Create a '${type}'activity! Are you sure?`))
+                {
+                    fetch (`/api/leads/addactivity/${type}/${id}`, {method:"POST", headers: {"content-type" : "application/json"}})
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.isSuccess)
+                        {
+                            alert(data.messages.join(", "))
+                        }
+                        else 
+                        {
+                            location.reload()
+                        }
+                    })
+                    .catch(err => console.error(err))
+                }
+              }
+            }
+    </script>
+}
